@@ -13,21 +13,21 @@ class HomeController extends Controller
     public function index(Content $content)
     {
         return $content
-            ->header('Dashboard')
-            ->description('Description...')
+            ->header('Админ панель')
+            ->description('сайта Magazine')
             ->row(Dashboard::title())
             ->row(function (Row $row) {
 
                 $row->column(4, function (Column $column) {
-                    $column->append(Dashboard::environment());
+                    $column->append(Dashboard::environment());//среда
                 });
 
                 $row->column(4, function (Column $column) {
-                    $column->append(Dashboard::extensions());
+                    $column->append(Dashboard::extensions());// расширения
                 });
 
                 $row->column(4, function (Column $column) {
-                    $column->append(Dashboard::dependencies());
+                    $column->append(Dashboard::dependencies());// зависимости
                 });
             });
     }
