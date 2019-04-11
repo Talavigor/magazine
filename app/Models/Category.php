@@ -12,12 +12,5 @@ class Category extends Model
 
     protected $table = 'categories';
 
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
 
-        $this->setParentColumn('pid');
-        $this->setOrderColumn('sort');
-        $this->setTitleColumn('name');
-    }
 }
