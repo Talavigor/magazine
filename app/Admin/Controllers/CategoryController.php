@@ -9,12 +9,20 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
+use Illuminate\Http\Request;
 use Encore\Admin\Tree;
 use Encore\Admin\Facades\Admin;
+use Illuminate\Support\Str;
+use Encore\Admin\Layout\Column;
+use Encore\Admin\Layout\Row;
+use Encore\Admin\Widgets\Box;
+use Illuminate\Routing\Controller as RouteController;
+use Encore\Admin\Controllers\ModelForm;
 
 class CategoryController extends Controller
 {
     use HasResourceActions;
+//    use ModelForm;
 
     /**
      * Index interface.
@@ -28,6 +36,36 @@ class CategoryController extends Controller
             ->header('Index')
             ->description('description')
             ->body($this->grid());
+    }
+
+    public function treeCategory(Content $content)
+    {
+        return Admin::content(function (Content $content) {
+            $content->header('Categories');
+            $content->body(Category::tree(function ($tree) {
+                $tree->branch(function ($branch) {
+                    return "<strong>{$branch['title']}</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ID: {$branch['id']}&nbsp;&nbsp;Uri: {$branch['slug']}";
+                });
+            }));
+        });
+    }
+
+    /**
+     * @return \Encore\Admin\Tree
+     */
+    protected function treeView()
+    {
+        $categoryModel = new Category();
+
+        return $categoryModel::tree(function (Tree $tree) {
+            $tree->disableCreate();
+
+            $tree->branch(function ($branch) {
+                $payload = "&nbsp;<strong>{$branch['title']}</strong>";
+
+                return $payload;
+            });
+        });
     }
 
     /**
@@ -70,8 +108,23 @@ class CategoryController extends Controller
     {
         return $content
             ->header('Create')
-            ->description('description')
             ->body($this->form());
+    }
+
+    public function store(Request $request){
+        $slug = Str::slug($request->get('title'), '-');
+
+        $category = new Category([
+            'parent_id' => $request->get('parent_id'),
+            'title'=> $request->get('title'),
+            'order'=> $request->get('order'),
+            'slug'=> $slug,
+            'description'=> $request->get('description'),
+            'img'=> $request->get('img'),
+        ]);
+        $category->save();
+
+        return redirect('/admin/category');
     }
 
     /**
@@ -85,13 +138,21 @@ class CategoryController extends Controller
 
         $grid->id('Id');
         $grid->parent_id('Parent id');
-        $grid->name('Name');
+        $grid->title('Title');
         $grid->order('Order');
         $grid->slug('Slug');
         $grid->description('Description');
         $grid->img('Img');
         $grid->created_at('Created at');
         $grid->updated_at('Updated at');
+
+        $grid->filter(function($filter){
+            $filter->like('title', 'title');
+            $filter->like('slug', 'slug');
+            $filter->date('created_at', 'По дате создания');
+
+
+        });
 
         return $grid;
     }
@@ -108,7 +169,7 @@ class CategoryController extends Controller
 
         $show->id('Id');
         $show->parent_id('Parent id');
-        $show->name('Name');
+        $show->title('Title');
         $show->order('Order');
         $show->slug('Slug');
         $show->description('Description');
@@ -126,14 +187,15 @@ class CategoryController extends Controller
      */
     protected function form()
     {
-        $form = new Form(new Category);
-
-        $form->number('parent_id', 'Parent id');
-        $form->text('name', 'Name');
-        $form->number('order', 'Order');
-        $form->text('slug', 'Slug');
-        $form->text('description', 'Description');
-        $form->image('img', 'Img');
+        $categoryModel = new Category();
+        $form = new Form($categoryModel);
+        $form->select('parent_id', trans('admin.parent_id'))->options($categoryModel::selectOptions());
+//        $form->number('parent_id', 'ID Родителя');
+        $form->text('title', 'Название');
+        $form->number('order', 'Сортировка');
+        $form->text('slug', 'Символьный код');
+        $form->text('description', 'Описание');
+        $form->image('img', 'Фото');
 
         return $form;
     }
