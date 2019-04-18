@@ -1,5 +1,14 @@
 <?php
-
+/*
+Очистка кэша фасада:
+php artisan cache:clear
+Очистка кэша роутов:
+php artisan route:cache
+Очистка кэша view:
+php artisan view:clear
+Очистка кэша конфигов:
+php artisan config:cache очищаем всегда кеш после изменения конфигов
+*/
 use Illuminate\Routing\Router;
 
 Admin::registerAuthRoutes();

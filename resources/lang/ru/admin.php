@@ -42,7 +42,7 @@ return [
     'description'           => 'Описание',
     'back'                  => 'Назад',
     'back_to_list'          => 'Вернуться к списку',
-    'submit'                => 'Отправить',
+    'submit'                => 'Сохранить',
     'menu'                  => 'Меню',
     'input'                 => 'Ввод',
     'succeeded'             => 'Завершена',
@@ -67,6 +67,7 @@ return [
     'updated_at'            => 'Дата обновления',
     'alert'                 => 'Ошибка',
     'parent_id'             => 'Родитель',
+    'parent_id_category'    => 'Родительская категория',
     'icon'                  => 'Иконка',
     'uri'                   => 'URI',
     'operation_log'         => 'Журнал событий',
@@ -100,4 +101,6 @@ return [
     ],
 
     'menu_titles' => [],
+    'yes'                    => 'да',
+    'no'                     => 'нет',
 ];

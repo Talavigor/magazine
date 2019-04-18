@@ -11,7 +11,6 @@ class Category extends Model
 {
     use ModelTree, AdminBuilder;
 
-    protected $table = 'categories';
 
     protected $fillable = [
         'parent_id',
@@ -20,6 +19,7 @@ class Category extends Model
         'slug',
         'description',
         'img',
+        'active',
     ];
 
     /**
