@@ -87,24 +87,31 @@ class CategoryController extends Controller
             ->body($this->form());
     }
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
 
         $slug = Str::slug($request->get('title'), '-');
-        if ($request->get('active') == 'on'){
+        if ($request->get('active') == 'on') {
             $active = '1';
-        }else{
+        } else {
             $active = '0';
         }
 
-        $category = new Category([
-            'parent_id' => $request->get('parent_id'),
-            'title'=> $request->get('title'),
-            'order'=> $request->get('order'),
-            'slug'=> $slug,
-            'description'=> $request->get('description'),
-            'img'=> $request->get('img'),
-            'active'=> $active,
-        ]);
+        $category = new Category();
+        $category->parent_id = $request->get('parent_id');
+        $category->title = $request->get('title');
+        $category->order = $request->get('order');
+        $category->slug = $slug;
+        $category->description = $request->get('description');
+        if ($request->img) {
+            $file = $request->img;
+            $filename = $file->getClientOriginalName();
+            $path = 'public/uploads/categories';
+            request()->img->move(public_path($path), $filename);
+            $category->img = $path.'/'.$filename;
+        }
+        $category->active = $active;
+
         $category->save();
         return redirect('/admin/category');
     }
@@ -188,6 +195,7 @@ class CategoryController extends Controller
             $form->number('order', 'Order');
             $form->text('slug', 'Символьный код');
             $form->image('img', 'img')->move('public/upload/categories/');
+//            $form->image('img', 'img');
             $form->switch('active', '')->states($states);
         });
 
@@ -198,7 +206,6 @@ class CategoryController extends Controller
     {
         $category = Category::find($id);
 
-dd($request->file('img'));
         if ($request->get('active') == 'on'){
             $active = '1';
         }else{
@@ -210,11 +217,16 @@ dd($request->file('img'));
         $category->order = $request->get('order');
         $category->slug = $request->get('slug');
         $category->description = $request->get('description');
-        $category->img = $request->get('img');
+        if ($request->img) {
+            $file = $request->img;
+            $filename = $file->getClientOriginalName();
+            $path = 'public/uploads/categories';
+            request()->img->move(public_path($path), $filename);
+            $category->img = $path.'/'.$filename;
+        }
         $category->active = $active;
         $category->save();
 
         return redirect('/admin/category');
-//        return redirect('/admin/category/'.$id.'/edit');
     }
 }
