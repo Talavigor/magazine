@@ -31,4 +31,9 @@ class Category extends Model
     {
         parent::__construct($attributes);
     }
+
+    public function img_categories()
+    {
+        return $this->hasMany(ImgCategory::class, 'category_id');
+    }
 }

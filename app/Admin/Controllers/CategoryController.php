@@ -12,6 +12,8 @@ use Encore\Admin\Show;
 use Illuminate\Http\Request;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Input;
+use Intervention\Image\ImageManagerStatic as Image;
 
 class CategoryController extends Controller
 {
@@ -42,7 +44,6 @@ class CategoryController extends Controller
             }));
         });
     }
-
 
     /**
      * Show interface.
@@ -106,10 +107,14 @@ class CategoryController extends Controller
         if ($request->img) {
             $file = $request->img;
             $filename = $file->getClientOriginalName();
-            $path = 'public/uploads/categories';
-            request()->img->move(public_path($path), $filename);
+            $path = 'uploads/categories';
+            request()->img->move(public_path('uploads/categories'), $filename);
             $category->img = $path.'/'.$filename;
         }
+//        $img = $request->file('image');
+//        $filename = $img->getClientOriginalName();
+//        Image::make($img->getRealPath())->save(public_path('uploads/categories'),$filename);
+//        $category->img = 'uploads/categories'.$filename;
         $category->active = $active;
 
         $category->save();
@@ -194,16 +199,18 @@ class CategoryController extends Controller
             $form->text('description', 'Description');
             $form->number('order', 'Order');
             $form->text('slug', 'Символьный код');
-            $form->image('img', 'img')->move('public/upload/categories/');
-//            $form->image('img', 'img');
+            $form->image('img', 'img');
             $form->switch('active', '')->states($states);
         });
 
         return $grid;
     }
 
-    public function update(Request $request, $id)
+    public function update1(Request $request, $id, $data = null)
     {
+        $data = ($data) ?: Input::all();
+//        dd($data);
+
         $category = Category::find($id);
 
         if ($request->get('active') == 'on'){
@@ -217,12 +224,14 @@ class CategoryController extends Controller
         $category->order = $request->get('order');
         $category->slug = $request->get('slug');
         $category->description = $request->get('description');
-        if ($request->img) {
+        if (!empty($request->img) && $request->img != '_file_del_') {
             $file = $request->img;
             $filename = $file->getClientOriginalName();
-            $path = 'public/uploads/categories';
-            request()->img->move(public_path($path), $filename);
+            $path = 'uploads/categories';
+            request()->img->move(public_path('uploads/categories'), $filename);
             $category->img = $path.'/'.$filename;
+//            $file_path = $request->file('file')->store('public');
+//            Image::make(Input::file('photo'))->save($path.'/'.$filename);
         }
         $category->active = $active;
         $category->save();
