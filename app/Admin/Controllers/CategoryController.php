@@ -14,6 +14,9 @@ use Encore\Admin\Facades\Admin;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Input;
 use Intervention\Image\ImageManagerStatic as Image;
+use Intervention\Image\Facades\Image as ImageInt;
+use App\Models\Img;
+use App\Models\ImgCategory;
 
 class CategoryController extends Controller
 {
@@ -104,20 +107,25 @@ class CategoryController extends Controller
         $category->order = $request->get('order');
         $category->slug = $slug;
         $category->description = $request->get('description');
-        if ($request->img) {
-            $file = $request->img;
-            $filename = $file->getClientOriginalName();
-            $path = 'uploads/categories';
-            request()->img->move(public_path('uploads/categories'), $filename);
-            $category->img = $path.'/'.$filename;
-        }
-//        $img = $request->file('image');
-//        $filename = $img->getClientOriginalName();
-//        Image::make($img->getRealPath())->save(public_path('uploads/categories'),$filename);
-//        $category->img = 'uploads/categories'.$filename;
         $category->active = $active;
-
         $category->save();
+        if ($files = $request->allFiles()) {
+            $path = 'uploads/categories/';
+            foreach ($files as $key => $file) {
+                foreach ($file['new_1']['path'] as $f) {
+                    $filename = $f->getClientOriginalName();
+                    $image = ImageInt::make($f);
+                    $image->resize(400, 543)->save($path . $filename);
+//                    $img = new Img([
+                    $img = new ImgCategory([
+                        'path' => $path . $filename,
+                        'title' => $filename
+                    ]);
+                    $category->imgs()->save($img);
+                }
+            }
+        }
+
         return redirect('/admin/category');
     }
 
@@ -136,7 +144,6 @@ class CategoryController extends Controller
         $grid->order('Order');
         $grid->slug('Slug');
         $grid->description('Description');
-        $grid->img('Img');
         $grid->active('Active')->display(function ($active) {
             return $active ? trans('admin.yes') : trans('admin.no');
         });
@@ -199,8 +206,16 @@ class CategoryController extends Controller
             $form->text('description', 'Description');
             $form->number('order', 'Order');
             $form->text('slug', 'Символьный код');
-            $form->image('img', 'img');
             $form->switch('active', '')->states($states);
+//            $form->hasMany('imgs', function (Form\NestedForm $form) {
+            $form->hasMany('img_categories', function (Form\NestedForm $form) {
+//                $form->image('path');
+//                $form->multipleImage('path');
+            });
+            $form->hasMany('imgs', function (Form\NestedForm $form) {
+dd($form);
+            });
+
         });
 
         return $grid;

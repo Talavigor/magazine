@@ -18,7 +18,7 @@ class Category extends Model
         'order',
         'slug',
         'description',
-        'img',
+        'imgg',
         'active',
     ];
 
@@ -32,8 +32,13 @@ class Category extends Model
         parent::__construct($attributes);
     }
 
+    public function imgs()
+    {
+        return $this->hasMany('App\Models\Img', 'category_id');
+    }
+
     public function img_categories()
     {
-        return $this->hasMany(ImgCategory::class, 'category_id');
+        return $this->hasMany('App\Models\ImgCategory', 'category_id');
     }
 }
