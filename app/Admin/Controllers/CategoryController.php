@@ -108,22 +108,23 @@ class CategoryController extends Controller
         $category->slug = $slug;
         $category->description = $request->get('description');
         $category->active = $active;
+        $category->save();
         $arr_image = $request->get('img_categories');
-//        $category->save();
         if ($files = $request->allFiles()) {
             $path = 'uploads/categories/';
-            dd($files);
-            foreach ($files as $key => $file) {
-                    $filename = $file['new_1']['path']->getClientOriginalName();
-                    $image = ImageInt::make($file['new_1']['path']);
-                    $image->resize(400, 543)->save($path . $filename);
-                    $img = new ImgCategory([
-                        'path' => $path . $filename,
-                        'title' => $filename,
-                        'name' => '',
-                        'order' => '',
-                    ]);
-                    $category->imgs()->save($img);
+            $i = 1;
+            foreach ($files['img_categories'] as $file) {
+                $filename = $file['path']->getClientOriginalName();
+                $image = ImageInt::make($file['path']);
+                $image->resize(400, 543)->save($path . $filename);
+                $img = new ImgCategory([
+                    'path' => $path . $filename,
+                    'title' => $filename,
+                    'name' => $arr_image['new_' . $i]['name'],
+                    'order' => $arr_image['new_' . $i]['order'],
+                ]);
+                $category->imgs()->save($img);
+                $i++;
             }
         }
 
@@ -208,9 +209,8 @@ class CategoryController extends Controller
             $form->number('order', 'Order');
             $form->text('slug', 'Символьный код');
             $form->switch('active', '')->states($states);
-//            $form->hasMany('imgs', function (Form\NestedForm $form) {
             $form->hasMany('img_categories', function (Form\NestedForm $form) {
-                $form->image('path');
+                $form->image('path')->removable();
                 $form->number('order', 'Order');
                 $form->text('name', 'Name');
             });
@@ -220,10 +220,14 @@ class CategoryController extends Controller
         return $grid;
     }
 
-    public function update1(Request $request, $id, $data = null)
+    public function update(Request $request, $id, $data = null)
     {
         $data = ($data) ?: Input::all();
-//        dd($data);
+//        return response([
+//            'status'  => true,
+//            'message' => trans('admin.update_succeeded'),
+//        ]);
+        dd($request->allFiles(),$data,$request);
 
         $category = Category::find($id);
 
