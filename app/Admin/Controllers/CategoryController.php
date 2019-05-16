@@ -108,21 +108,22 @@ class CategoryController extends Controller
         $category->slug = $slug;
         $category->description = $request->get('description');
         $category->active = $active;
-        $category->save();
+        $arr_image = $request->get('img_categories');
+//        $category->save();
         if ($files = $request->allFiles()) {
             $path = 'uploads/categories/';
+            dd($files);
             foreach ($files as $key => $file) {
-                foreach ($file['new_1']['path'] as $f) {
-                    $filename = $f->getClientOriginalName();
-                    $image = ImageInt::make($f);
+                    $filename = $file['new_1']['path']->getClientOriginalName();
+                    $image = ImageInt::make($file['new_1']['path']);
                     $image->resize(400, 543)->save($path . $filename);
-//                    $img = new Img([
                     $img = new ImgCategory([
                         'path' => $path . $filename,
-                        'title' => $filename
+                        'title' => $filename,
+                        'name' => '',
+                        'order' => '',
                     ]);
                     $category->imgs()->save($img);
-                }
             }
         }
 
@@ -209,11 +210,9 @@ class CategoryController extends Controller
             $form->switch('active', '')->states($states);
 //            $form->hasMany('imgs', function (Form\NestedForm $form) {
             $form->hasMany('img_categories', function (Form\NestedForm $form) {
-//                $form->image('path');
-//                $form->multipleImage('path');
-            });
-            $form->hasMany('imgs', function (Form\NestedForm $form) {
-dd($form);
+                $form->image('path');
+                $form->number('order', 'Order');
+                $form->text('name', 'Name');
             });
 
         });

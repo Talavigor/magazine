@@ -10,7 +10,8 @@ class ImgCategory extends Model
         'category_id',
         'title',
         'path',
-        'alt',
+        'name',
+        'order',
     ];
 
     public function category()
